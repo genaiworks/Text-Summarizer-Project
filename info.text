@@ -1,0 +1,2 @@
+conda create -n textS python=3.8 -y
+conda activate textS
