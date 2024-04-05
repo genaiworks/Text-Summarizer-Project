@@ -1,7 +1,7 @@
 transformers
 transformers[sentencepiece]
 datasets
-# sacreblue==2.4.1
+# sacrebleu
 # pip install --upgrade --force-reinstall sacrebleu.
 rouge_score
 py7zr

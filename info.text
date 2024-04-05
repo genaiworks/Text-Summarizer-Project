@@ -1,2 +1,13 @@
 conda create -n textS python=3.8 -y
 conda activate textS
+
+Here sacrebleu is used as evaluation matrix for text summarization, use rowmatrix
+pip install --upgrade --force-reinstall sacrebleu
+
+For python packaging: 
+Python package is folder containing __init__.py file.
+To distribute the package using PyPI use setup.py.
+setuptools is used to build the package, setuptools.setup is used to store metadata. find_packages will add folder with __init and add to packaging metadata automatically.
+setup.py for local package installation/distribution code, used if we want to publish package as PyPI package.
+pip install -e is how setuptools dependencies are handled via pip. What you typically do is to install the dependencies.
+run pip install -e . or pip install -e .[dev]* And now all the dependencies should be installed.
