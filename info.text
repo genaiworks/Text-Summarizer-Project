@@ -11,3 +11,116 @@ setuptools is used to build the package, setuptools.setup is used to store metad
 setup.py for local package installation/distribution code, used if we want to publish package as PyPI package.
 pip install -e is how setuptools dependencies are handled via pip. What you typically do is to install the dependencies.
 run pip install -e . or pip install -e .[dev]* And now all the dependencies should be installed.
+
+Rogue Metric:  Recall Oriented Understudy for Gisting evaluation
+Tell how good the summary is compare to the reference summary.  Compared geneated summary to human summaries.
+Rouge compares the N gram of the generated summary to the n gram of reference summary. N grams mean chunk of N words.  
+
+Recall of the rouge = Num of words matches/ Num of words in reference summary
+    if recall = 1 means all the words in the reference summary being produced in the generated summary.
+
+precision = Number of matches/ Total num of words in reference summary
+
+If there are 7 words in the machine generated summary and 6 words in the human reference summary.  And if 
+there are 6 matches.
+
+recall= number overlapping words/total number of words in human reference summary
+precision = number of overlapping words/total number of words in the machine generated summary
+F score = (precison * recall) / (precision + recall)
+
+Rogue context measures how much of geneated summary was relevant.
+
+Google Pegasus:
+Predict masked sentence in multi sentence texts.  
+
+To Get Model:
+model = AutoModel.from_pretrained("model_name)
+To Get Tokenizer
+tokenizer = AutoTokenizer.from_pretrained("model_name")
+To Get Input:
+inputs = tokenizer(raw_inputs, padding=True, truncation=True, return_tensors="pt")
+
+Sample Training:
+
+raw_dataset = load_dataset("glue", "mrpc")
+tokenizer = AutoTokenizer.from_pretrained("model_name")
+tokenize_datasets = raw_dataset.map(tokenize_function, batched=True)
+data_collator = DataCollatorWithPaddin(tokenizer=tokenizer)
+
+tokenized_datasets =tokenize_datasets.remove_colums(...)
+Model Accepts these columns
+["attention-mask","input_ids", "labels", "token_type_ids]
+
+from torch.utils.data import DataLoader
+train_dataloader = DataLoader(
+    tokenize_datasets["train"],shuffle=True, batch_size=8, collate_fn=data_collator
+)
+
+model = AutoModel.from_pretrained("model_name)
+optimize = AdamW(model.parameters(), lr=3e-5)
+device = torch.device("cuda") if torch.is_avalable() else torch.device("cpu")
+model.to(device)
+num_epoch=3
+
+num_training_steps = num_epoch * len(train_dataloader)
+
+lr_scheduler = get_scheduler(
+    "linear",
+    optimizer = optimizer,
+    num_warmup_steps=0,
+    num_training_steps= num_training_steps,
+)
+
+Training 
+    model.train()
+    for epoch in range(num_epoch):
+        for batch in train_dataloader:
+            batch = {k:v.to(device) for k, v in batch.items()}
+            output = model(**batch)
+            loss = output.loss
+            loss.backward()
+            optimizer.step()
+            lr_scheduler.step()
+            optimizer.zero_grad()
+
+Evaluation
+    for batch in eval_dataloader:
+        batch = {k:v.to(device) for k, v in batch.items()}
+        with torch.no_grad():
+            output = model(**batch)
+        
+        #logits are output of neural network, before activation function is applied
+        logits = output.logits
+        predictions = torch.argmax(logits, dim=-1)
+        metric.add_batch(prediction=precitions, reference=batch["labels"])
+    metric.compute()
+
+
+For Hugging Face:
+If data containing 3 columns:
+id dialogue summary
+
+input_encoding = tokenizer(example_batch['dialogue'])
+target_encoding = tokenizer(example_batch['summary'])
+
+Convert the data to contain three more cols
+    input_ids = input_encoding['input_ids']
+    attention_mask = input_encoding['attention_mask']
+    labels  = target_encoding['input_ids']
+
+Use map function to convert each line of input to above format.
+Use DataCollatorForSeq2Seq to create batches.
+
+1. Create trainer 
+    trainer = Trainer(model=model_pegasus, args=trainer_args, tokenizer=tokenizers, 
+    data_collator=seq2seq_data_collator, train_dataset=dataset_samsum["train"], eval_datset=dataset_samsum["validation"])
+    trainer.train()
+2. Evaluation
+    Get batch of return dataset[1+i:batch_size]
+    inputs = tokenizer(input_data_batch,.)
+    #get geneated output
+    output = model.generate(inputs[input_ids], input["attention_mask"],)
+    #decode geneated output, here replace tokens with decoded text
+    prediction = tokenizer.decode(for s in output)
+3. Get Metrics on Test Data:
+    Use rouge metrics for text summarization output
