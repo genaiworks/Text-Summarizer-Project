@@ -9,21 +9,7 @@ from typing import Any
 
 @ensure_annotations
 def read_yaml(path: Path) -> ConfigBox:
-    """Read a YAML file and return a ConfigBox object.
-    Parameters
-    ----------
-    path : Path
-        Path to the YAML file.
-    Returns
-    -------
-    ConfigBox
-        A ConfigBox object.
-    Raises
-    ------
-    BoxValueError
-        If the YAML file cannot be read.
-    """
-    with open(path, "r") as f:
+    with open(path) as f:
         try:
             content = yaml.safe_load(f)
             logger.info(f"Read YAML file: {path}")
@@ -32,12 +18,13 @@ def read_yaml(path: Path) -> ConfigBox:
             raise BoxValueError(f"Cannot read YAML file: {e}")
         
 @ensure_annotations
-def create_directories(path_to_directorier: list, verbose=True):
+def create_directories(path_to_directory:list , verbose=True):
     """ create list of directories
     Args:
         path_to_directorier (list): list of paths of directories to be created.
     """
-    for path in path_to_directorier:
+        
+    for path in path_to_directory:
         if not os.path.exists(path):
             os.makedirs(path)   
             if verbose:
