@@ -15,3 +15,6 @@
 6. Update the pipeline
 7. Update main.py
 8. Update app.py
+
+Modify .git/config URL to following
+url = ssh://git@github.com/genaiworks/Text-Summarizer-Project.git
