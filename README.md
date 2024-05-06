@@ -1,4 +1,4 @@
-# End to end Text-Summarizer-Project
+# End to end Text-Summarizer-Project using generative AI 
 
 ## Workflow 
 
